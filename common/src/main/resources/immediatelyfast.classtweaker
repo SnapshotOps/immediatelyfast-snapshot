@@ -1,5 +1,8 @@
 classTweaker v1 official
 
+# avoid_redundant_framebuffer_switching
+accessible class com/mojang/renderpearl/backend/opengl/GlDevice
+
 # batch_animated_item_updates
 accessible field net/minecraft/client/gui/render/GuiItemAtlas texture Lcom/mojang/renderpearl/api/textures/GpuTexture;
 accessible field net/minecraft/client/gui/render/GuiItemAtlas depthTexture Lcom/mojang/renderpearl/api/textures/GpuTexture;

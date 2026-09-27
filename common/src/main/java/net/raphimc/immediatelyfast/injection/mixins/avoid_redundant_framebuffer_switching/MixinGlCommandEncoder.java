@@ -21,7 +21,9 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.renderpearl.backend.opengl.GlConst;
 import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import net.raphimc.immediatelyfast.ImmediatelyFast;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -29,15 +31,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlCommandEncoder")
 public abstract class MixinGlCommandEncoder {
 
+    @Shadow
+    @Final
+    private GlStateManager stateManager;
+
     @WrapWithCondition(method = "submitRenderPass", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/backend/opengl/GlStateManager;_glBindFramebuffer(II)V"))
-    private boolean dontUnbindFramebuffer(final int target, final int framebuffer) {
+    private boolean dontUnbindFramebuffer(final GlStateManager instance, final int target, final int framebuffer) {
         return !ImmediatelyFast.runtimeConfig.avoid_redundant_framebuffer_switching;
     }
 
     // https://github.com/RaphiMC/ImmediatelyFast/issues/351
     @Inject(method = "presentTexture", at = @At("HEAD"))
     private void unbindFramebufferBeforePresenting(final CallbackInfo ci) {
-        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+        this.stateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
     }
 
 }
